@@ -12,5 +12,7 @@ struct Shape
 
     Shape() = default;
 
-    void draw(Adafruit_ST7735& tft);
+    virtual void draw(Adafruit_ST7735 &tft, BLA::Matrix<4, 4> &camera);
+
+    void translate(BLA::Matrix<3> &p);
 };

@@ -4,7 +4,9 @@
 
 #include <math.h>
 
-#include "shape.h"
+// #define DEBUG
+#include "building.h"
+
 
 static const int sclk = 13;
 static const int mosi = 11;
@@ -27,12 +29,15 @@ BLA::Matrix<4> vertices[8] {
   BLA::Matrix<4>{ x, -x, -x, 1}
 };
 
+Building b0{2}, b1{2};
 
 void setup()
 {
-  // Serial.begin(9600); // serial monitor stuff
-  // Serial.println("TFT ST7735 display test");
-  // Serial.println();
+  #ifdef DEBUG
+  Serial.begin(9600); // serial monitor stuff
+  Serial.println("TFT ST7735 display test");
+  Serial.println();
+  #endif
 
   // tft.initSPI()
   tft.initR(INITR_BLACKTAB); // initialize a ST7735S chip, black tab
@@ -41,23 +46,18 @@ void setup()
 
   tft.fillScreen(ST7735_BLACK);
   // tft.fillRect(0, 0, tft.width(), tft.height(), 0x0000);
+
+  BLA::Matrix<3> p{0, 0, -1.5};
+  b0.translate(p);
+  p = {0, 0, 1.5};
+  b1.translate(p);
 }
 
 float theta{0.0f};
-const int image_width = 128;
-const int image_height = 160;
-const float angle_of_view = 90;
-const float near = 0.1;
-const float far = 100;
-
-
-unsigned long prevMillis{0};
-const long interval{200};
 
 void loop()
 {
-
-  // unsigned long currentMillis{millis()};
+  tft.fillScreen(0x0000);
 
   // unsigned long start{millis()};
   // BLA::Matrix<4, 4> rotX{
@@ -96,8 +96,10 @@ void loop()
   };
   camera = BLA::Invert(camera);
 
-  BLA::Matrix<4> nVertices[8];
+  // BLA::Matrix<4> nVertices[8];
 
+  /**
+   * Temporarily disabling the original cube logic
   for (int i=0; i<8; ++i)
   {
     auto vtx = vertices[i];
@@ -117,6 +119,32 @@ void loop()
     // Serial << nVertices[i];
     // Serial.println();
   }
+  */
+
+  // for (int bidx=0; bidx<8; ++bidx)
+  // {
+  //   auto vtx = b0.vertices[bidx];
+  //   vtx = camera * vtx;
+
+  //   b0.vertices[bidx] = {
+  //     -vtx(0)/vtx(2)*30 + tft.width()/2.0,
+  //     -vtx(1)/vtx(2)*30 + tft.height()/2.0,
+  //     1,
+  //     1
+  //   };
+
+  //   #ifdef DEBUG
+  //   Serial << nVertices[bidx];
+  //   Serial.println();
+  //   #endif
+  // }
+
+  // Serial.print("B0 Indexes size: ");
+  // Serial.println(b0.size);
+  tft.startWrite();
+  b0.draw(tft, camera);
+  b1.draw(tft, camera);
+  tft.endWrite();
 
   // unsigned long end{millis()};
   // Serial.println("Matrix operations took: "+String(end-start)+"ms");
@@ -124,31 +152,31 @@ void loop()
 
   // start = millis();
 
-  tft.startWrite();
-  tft.setAddrWindow(0, 0, tft.width()+2, tft.height()+2);
-  tft.writeFillRect(0, 0, tft.width()+2, tft.height()+2, 0x0000);
+  // tft.startWrite();
+  // tft.setAddrWindow(0, 0, tft.width()+2, tft.height()+2);
+  // tft.writeFillRect(0, 0, tft.width()+2, tft.height()+2, 0x0000);
 
-  for (int i=0,j=1; i<4; ++i)
-  {
-    auto v0 = nVertices[i];
-    auto v1 = nVertices[(j++)%4];
-    if (v0(0) == v1(0))
-      tft.writeFastVLine(v0(0), v0(1), v1(1)-v0(1), 0xFFFF);
-    else
-      tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
-  }
-  for (int i=4,j=5; i<8; ++i)
-  {
-    auto v0 = nVertices[i];
-    if (j==8) j=4;
-    auto v1 = nVertices[j++];
-    if (v0(0) == v1(0))
-      tft.writeFastVLine(v0(0), v0(1), v1(1)-v0(1), 0xFFFF);
-    else
-      tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
-  }
-  auto v0 = nVertices[0];
-  auto v1 = nVertices[1];
+  // for (int i=0,j=1; i<4; ++i)
+  // {
+  //   auto v0 = nVertices[i];
+  //   auto v1 = nVertices[(j++)%4];
+  //   if (v0(0) == v1(0))
+  //     tft.writeFastVLine(v0(0), v0(1), v1(1)-v0(1), 0xFFFF);
+  //   else
+  //     tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
+  // }
+  // for (int i=4,j=5; i<8; ++i)
+  // {
+  //   auto v0 = nVertices[i];
+  //   if (j==8) j=4;
+  //   auto v1 = nVertices[j++];
+  //   if (v0(0) == v1(0))
+  //     tft.writeFastVLine(v0(0), v0(1), v1(1)-v0(1), 0xFFFF);
+  //   else
+  //     tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
+  // }
+  // auto v0 = nVertices[0];
+  // auto v1 = nVertices[1];
   // tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
 
   // v0 = nVertices[1];
@@ -179,23 +207,23 @@ void loop()
   // v1 = nVertices[4];
   // tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
 
-  v0 = nVertices[0];
-  v1 = nVertices[4];
-  tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
+  // v0 = nVertices[0];
+  // v1 = nVertices[4];
+  // tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
 
-  v0 = nVertices[1];
-  v1 = nVertices[5];
-  tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
+  // v0 = nVertices[1];
+  // v1 = nVertices[5];
+  // tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
 
-  v0 = nVertices[2];
-  v1 = nVertices[6];
-  tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
+  // v0 = nVertices[2];
+  // v1 = nVertices[6];
+  // tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
 
-  v0 = nVertices[3];
-  v1 = nVertices[7];
-  tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
+  // v0 = nVertices[3];
+  // v1 = nVertices[7];
+  // tft.writeLine(v0(0), v0(1), v1(0), v1(1), 0xFFFF);
 
-  tft.endWrite();
+  // tft.endWrite();
 
   // end = millis();
   // Serial.println("Drawing operations took: "+String(end-start)+"ms");

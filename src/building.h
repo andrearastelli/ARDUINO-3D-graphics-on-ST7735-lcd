@@ -1,5 +1,7 @@
 #include "shape.h"
 
+class Adafruit_ST7735;
+
 struct Building : public Shape
 {
     Building(uint8_t height)
@@ -15,21 +17,17 @@ struct Building : public Shape
         vertices[6] = {1, height, -1, 1};
         vertices[7] = {-1, height, -1, 1};
 
-        indexes = new uint8_t[36]{
-            0, 1, 2,
-            0, 2, 3,
-            4, 5, 6,
-            4, 6, 7,
-            0, 1, 5,
-            0, 5, 4,
-            1, 2, 6,
-            1, 6, 5,
-            2, 3, 7,
-            2, 7, 6,
-            3, 0, 4,
-            3, 4, 7
+        indexes = new uint8_t[24]{
+            0, 1, 2, 3,  // 4
+            4, 5, 6, 7,  // 8
+            0, 1, 5, 4,  // 12
+            1, 2, 6, 5,  // 16
+            2, 3, 7, 6,  // 20
+            3, 0, 4, 7   // 24
         };
 
-        size = 36;
+        size = 24;
     }
+
+    void draw(Adafruit_ST7735 &tft, BLA::Matrix<4, 4> &camera) override;
 };
