@@ -8,3 +8,5 @@ lib/README
 include/README
 platformio.ini
 .vscode/extensions.json
+test/test_main.cpp
+test/tmp_pio_test_transport.cpp
