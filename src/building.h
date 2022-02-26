@@ -1,5 +1,7 @@
 #include "shape.h"
 
+#pragma once
+
 class Adafruit_ST7735;
 
 struct Building : public Shape
